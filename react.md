@@ -883,6 +883,297 @@ Place this as the last `<Route>` to catch all unknown routes.
 | Optimization     | react-hook-form, lazy load, suspense |
 | Code Practices   | Forms, Counters, Custom Stores       |
 
+
 ---
+
+### 1. **Async/Await vs Promises**
+
+**Answer:**
+
+* Both are used for **handling asynchronous operations**
+* `async/await` is syntactic sugar over Promises to write **cleaner, more readable code**
+
+```js
+// Promise
+fetchData().then(res => console.log(res)).catch(err => console.error(err));
+
+// Async/Await
+async function loadData() {
+  try {
+    const res = await fetchData();
+    console.log(res);
+  } catch (err) {
+    console.error(err);
+  }
+}
+```
+
+✅ Use `async/await` for **cleaner flow**, especially in React hooks like `useEffect`.
+
+---
+
+### 2. **How do you implement async in React?**
+
+```jsx
+useEffect(() => {
+  const fetchData = async () => {
+    const res = await fetch("https://api.example.com/data");
+    const json = await res.json();
+    setData(json);
+  };
+  fetchData();
+}, []);
+```
+
+> You can’t directly make `useEffect` async, so define and call an inner async function.
+
+---
+
+### 3. **What is `useRef` and how is it used?**
+
+**Answer:**
+
+* `useRef` holds **mutable reference values** that **don’t cause re-renders**
+
+```jsx
+const inputRef = useRef();
+
+return (
+  <>
+    <input ref={inputRef} />
+    <button onClick={() => inputRef.current.focus()}>Focus</button>
+  </>
+);
+```
+
+Also useful for:
+
+* Storing **previous values**
+* Skipping **initial renders** (debouncing)
+* Managing DOM elements (like inputs, timers)
+
+---
+
+### 4. **`useMemo` vs `useRef`**
+
+| Hook      | Purpose                                    |
+| --------- | ------------------------------------------ |
+| `useRef`  | Mutable object ref (DOM or instance)       |
+| `useMemo` | Memoize computation to avoid recalculating |
+
+---
+
+### 5. **Class A and B – Dependency Injection style call**
+
+Assuming:
+
+```js
+class A {
+  methodA() {
+    console.log("From A");
+  }
+}
+
+class B {
+  constructor(aInstance) {
+    this.aInstance = aInstance;
+  }
+
+  methodB() {
+    this.aInstance.methodA(); // calling method from A
+  }
+}
+```
+
+**DI (Dependency Injection)** happens by **passing one class instance into another**.
+
+```js
+const a = new A();
+const b = new B(a);
+b.methodB(); // Output: From A
+```
+
+✅ This decouples dependencies and makes unit testing easier.
+
+---
+
+### 6. **Testing Framework and Example (React Testing Library + Jest)**
+
+* Common tools: **Jest**, **React Testing Library (RTL)**, **Vitest**, **MSW**
+* Sample test using RTL:
+
+```jsx
+// Counter.jsx
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
+}
+
+// Counter.test.js
+import { render, screen, fireEvent } from "@testing-library/react";
+import { Counter } from "./Counter";
+
+test("increments count", () => {
+  render(<Counter />);
+  const button = screen.getByText(/Count:/);
+  fireEvent.click(button);
+  expect(button).toHaveTextContent("Count: 1");
+});
+```
+
+---
+
+### 7. **Difference between `let`, `var`, and `const` + Hoisting**
+
+| Keyword | Scope    | Re-assignable | Hoisting          |
+| ------- | -------- | ------------- | ----------------- |
+| `var`   | Function | Yes           | ✅ (but undefined) |
+| `let`   | Block    | Yes           | ✅ (TDZ error)     |
+| `const` | Block    | No            | ✅ (TDZ error)     |
+
+```js
+console.log(a); // undefined
+var a = 5;
+
+console.log(b); // ReferenceError
+let b = 5;
+```
+
+---
+
+### 8. **What is Closure in JavaScript?**
+
+**Answer:**
+A closure is a function that **remembers its lexical scope**, even if it's executed outside that scope.
+
+```js
+function outer() {
+  let count = 0;
+  return function inner() {
+    count++;
+    console.log(count);
+  };
+}
+
+const fn = outer();
+fn(); // 1
+fn(); // 2
+```
+
+✅ Useful in:
+
+* Function factories
+* Private variables
+* Event handlers
+
+---
+
+### 9. **What is TypeScript? Advantages? What does `type` mean?**
+
+**Answer:**
+TypeScript is a **typed superset of JavaScript** that compiles to plain JS.
+
+**Advantages:**
+
+* Catch errors during development
+* Auto-suggestions (IntelliSense)
+* Better refactoring
+* IDE support
+
+**`type`**: Declares a custom type or alias
+
+```ts
+type User = {
+  name: string;
+  age: number;
+};
+
+function greet(user: User) {
+  console.log(user.name);
+}
+```
+
+---
+
+### 10. **Server-Side Rendering (SSR) vs Client-Side Rendering (CSR)**
+
+| Feature     | SSR                   | CSR                          |
+| ----------- | --------------------- | ---------------------------- |
+| Rendering   | On server (HTML sent) | On browser (JS fetches data) |
+| Performance | Fast first load       | Slower initial render        |
+| SEO         | ✅ Good for SEO        | ❌ Requires workaround        |
+| Example     | Next.js               | CRA, Vite                    |
+
+✅ SSR tools: **Next.js**, **Remix**
+
+---
+
+## 🔁 **Promises vs Async/Await: Core Concepts**
+
+### ✅ **Both** are used to handle **asynchronous operations**, but differ in **syntax** and **readability**.
+
+---
+
+## 🔍 **Advantages of `async/await` over Promises**
+
+| Advantage                    | Description                                                                  |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| ✅ **Cleaner, readable code** | Looks like synchronous code, easier to follow especially with multiple steps |
+| ✅ **Easier to debug**        | Stack traces are more readable                                               |
+| ✅ **Better error handling**  | You can use `try/catch` instead of `.catch()` chaining                       |
+| ✅ **Avoids callback hell**   | No need for `.then().then().then()` chaining                                 |
+
+### Example:
+
+```js
+// ✅ Async/Await
+async function fetchUser() {
+  try {
+    const res = await fetch("/api/user");
+    const data = await res.json();
+    console.log(data);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+}
+```
+
+---
+
+## 🔍 **Advantages of Promises over Async/Await**
+
+| Advantage                           | Description                                                                                  |
+| ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| ✅ **More flexible**                 | Promises are more functional and composable (e.g., `Promise.all`, `Promise.race`)            |
+| ✅ **Useful in non-async functions** | Promises can be returned from any function; `async` can't be used in some non-async contexts |
+| ✅ **Chainable**                     | Good for simple one-liners or chaining tasks without introducing `async` functions           |
+| ✅ **Backwards-compatible**          | Works in environments that don’t support `async/await` (older Node.js or browsers)           |
+
+### Example:
+
+```js
+// ✅ Promise style
+fetch("/api/user")
+  .then(res => res.json())
+  .then(data => console.log(data))
+  .catch(err => console.error("Error:", err));
+```
+
+---
+
+## 🆚 **When to use what?**
+
+| Use Case                                        | Prefer                              |
+| ----------------------------------------------- | ----------------------------------- |
+| Sequential async steps with error handling      | `async/await`                       |
+| Complex chaining or concurrency (`Promise.all`) | `Promise`                           |
+| Inside `.map()` or `.forEach()` loops           | `Promise` (or async+`for..of` loop) |
+| Clean readability & simple flow                 | `async/await`                       |
+
+---
+
+## 🧠 Interview-ready One-liner:
+
+> "`async/await` makes async code more readable and maintainable, while Promises offer more control and composability — I choose based on readability or concurrency needs."
 
 
